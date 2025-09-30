@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "d:/Kurse und Aufgaben Ostfalia/5_Fünftes Semester WS25_26 (Frankreich)/Projet avancé/Teamprojekt/tsp_projet_2025",
+      "program": "d:/Kurse und Aufgaben Ostfalia/5_Fünftes Semester WS25_26 (Frankreich)/Projet avancé/Teamprojekt/tsp_projet_2025/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
