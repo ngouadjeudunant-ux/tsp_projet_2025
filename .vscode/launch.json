@@ -2,14 +2,27 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Exécuter programme C actif",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${fileDirname}/${fileBasenameNoExtension}.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb"
+    },
+    {
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/Kurse und Aufgaben Ostfalia/5_Fünftes Semester WS25_26 (Frankreich)/Projet avancé/Teamprojekt/tsp_projet_2025",
-      "program": "d:/Kurse und Aufgaben Ostfalia/5_Fünftes Semester WS25_26 (Frankreich)/Projet avancé/Teamprojekt/tsp_projet_2025/build/Debug/outDebug",
+      "cwd": "e:/Teamprojekt/tsp_projet_2025",
+      "program": "e:/Teamprojekt/tsp_projet_2025/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
