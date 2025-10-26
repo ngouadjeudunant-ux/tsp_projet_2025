@@ -2,27 +2,32 @@
 // Execution exemple : ./tsp.exe -f tests/data/att15.tsp -m nn
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #include "tsp_parser.h"
 #include "algo_nn.h"
 #include "algo_bf.h"
+#include "csv_export.h"
 
 void usage(const char *prog) {
-    printf("Usage : %s -f <fichier.tsp> -m <nn|bf>\n", prog);
+    printf("Usage : %s -f <fichier.tsp> -m <nn|bf> [-o <export.csv>]\n", prog);
 }
 
 int main(int argc, char **argv) {
     const char *fichier = NULL;
     const char *methode = NULL;
+    const char *csv_file = NULL;
 
-    // Lecture des options CLI
+    // Lecture options CLI
     for (int i = 1; i < argc; ++i) {
         if (!strcmp(argv[i], "-f") && i + 1 < argc)
             fichier = argv[++i];
         else if (!strcmp(argv[i], "-m") && i + 1 < argc)
             methode = argv[++i];
+        else if (!strcmp(argv[i], "-o") && i + 1 < argc)
+            csv_file = argv[++i];
         else if (!strcmp(argv[i], "-h")) {
             usage(argv[0]);
             return 0;
@@ -34,46 +39,55 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // Chargement de l'instance TSP
+    // Charger l’instance
     TSP_Instance *inst = tsp_read_file(fichier);
     if (!inst) {
-        fprintf(stderr, "Erreur lors du chargement de %s\n", fichier);
+        fprintf(stderr, "Erreur lors de la lecture du fichier %s\n", fichier);
         return 2;
     }
 
-    // Exécution de l’algorithme choisi
+    int *tour = NULL;
+    double length = 0.0;
+    clock_t start = clock();
+
+    // Exécution de l’algo
     if (!strcmp(methode, "nn")) {
-        int *tour = nn_tour(inst);
-        if (tour) {
-            double len = tour_length(inst, tour);
-            printf("Tournée NN : ");
-            for (int i = 0; i <= inst->dimension; ++i)
-                printf("%d ", tour[i] + 1);  // affichage 1-based
-            printf("\nLongueur : %.0f\n", len);
-            free(tour);
-        } else {
-            fprintf(stderr, "Erreur lors du calcul NN.\n");
+        tour = nn_tour(inst);
+        if (tour)
+            length = tour_length(inst, tour);
+    } else if (!strcmp(methode, "bf")) {
+        tour = malloc((inst->dimension + 1) * sizeof(int));
+        if (tour)
+            bf_solve(inst, tour, &length);
+    } else {
+        fprintf(stderr, "Méthode inconnue : %s\n", methode);
+        usage(argv[0]);
+        tsp_free_instance(inst);
+        return 3;
+    }
+
+    double elapsed = (double)(clock() - start) / CLOCKS_PER_SEC;
+
+    // Affichage résultat
+    if (tour) {
+        printf("Méthode : %s\n", methode);
+        printf("Tournée : ");
+        for (int i = 0; i <= inst->dimension; ++i)
+            printf("%d ", tour[i] + 1);
+        printf("\nLongueur : %.0f\nDurée : %.3fs\n", length, elapsed);
+
+        // Export CSV
+        if (csv_file) {
+            if (export_summary_csv(csv_file, inst->name, methode, elapsed, length, tour, inst->dimension) == 0)
+                printf("Exporté vers %s\n", csv_file);
         }
 
-    } else if (!strcmp(methode, "bf")) {
-        int n = inst->dimension;
-        int *best_tour = malloc(n * sizeof(int));
-        double best_cost = 0.0;
-
-        bf_solve(inst, best_tour, &best_cost);
-
-        printf("Tournée brute-force : ");
-        for (int i = 0; i < n; ++i)
-            printf("%d ", best_tour[i] + 1);
-        printf("%d\n", best_tour[0] + 1);  // retour au point de départ
-        printf("Longueur : %.0f\n", best_cost);
-        free(best_tour);
-
+        free(tour);
     } else {
-        fprintf(stderr, "Méthode '%s' non supportée.\n", methode);
-        usage(argv[0]);
+        fprintf(stderr, "Erreur lors du calcul de la tournée\n");
     }
 
     tsp_free_instance(inst);
     return 0;
 }
+
