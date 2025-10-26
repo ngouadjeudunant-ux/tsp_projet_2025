@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <float.h>
 #include "algo_nn.h"
+#include "tsp_parser.h"
 
 int* nn_tour(const TSP_Instance *inst) {
     int n = inst->dimension;

@@ -1,20 +1,16 @@
-/* main.c
- * Point d'entrée : parse les options CLI (-f, -m, -o, -c, -h) et orchestre l'exécution.
- * Appelle : parse_tsp(), select_dist(), construction de la tournée, algorithmes, affichage.
- * Entrées : arguments argv/argc ; Sorties : affichage CSV/console et code de sortie.
- * Compilation : gcc src/*.c -Iinclude -o tsp.exe -lm
- * 
- * executer : ./tsp.exe -f tests/data/att10.tsp -m nn   (avec plus proche voisin)
- */
+// Compilation : gcc src/*.c -Iinclude -o tsp.exe -lm
+// Execution exemple : ./tsp.exe -f tests/data/att15.tsp -m nn
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "tsp_parser.h"
 #include "algo_nn.h"
+#include "algo_bf.h"
 
 void usage(const char *prog) {
-    printf("Usage : %s -f <fichier.tsp> -m nn\n", prog);
+    printf("Usage : %s -f <fichier.tsp> -m <nn|bf>\n", prog);
 }
 
 int main(int argc, char **argv) {
@@ -45,7 +41,7 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    // Sélection de l’algorithme
+    // Exécution de l’algorithme choisi
     if (!strcmp(methode, "nn")) {
         int *tour = nn_tour(inst);
         if (tour) {
@@ -58,6 +54,21 @@ int main(int argc, char **argv) {
         } else {
             fprintf(stderr, "Erreur lors du calcul NN.\n");
         }
+
+    } else if (!strcmp(methode, "bf")) {
+        int n = inst->dimension;
+        int *best_tour = malloc(n * sizeof(int));
+        double best_cost = 0.0;
+
+        bf_solve(inst, best_tour, &best_cost);
+
+        printf("Tournée brute-force : ");
+        for (int i = 0; i < n; ++i)
+            printf("%d ", best_tour[i] + 1);
+        printf("%d\n", best_tour[0] + 1);  // retour au point de départ
+        printf("Longueur : %.0f\n", best_cost);
+        free(best_tour);
+
     } else {
         fprintf(stderr, "Méthode '%s' non supportée.\n", methode);
         usage(argv[0]);
