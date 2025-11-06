@@ -1,4 +1,4 @@
-#ifndef ALGO_BF_H
+#ifndef ALGO_BF_H 
 #define ALGO_BF_H
 
 #include "tsp_parser.h"  // contient la définition de TSP_Instance (dont inst->n et inst->dist)
