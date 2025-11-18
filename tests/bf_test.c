@@ -36,10 +36,10 @@ void *assignment_cost(void *unused, int *perm) {
     }
 
     // Affichage de la permutation testée
-    printf("Permutation testée : ");
+    printf("Permutation testee : ");
     for (int i = 0; i < N; ++i)
         printf("%d ", perm[i]);
-    printf("→ Coût : %llu\n", *cost);
+    printf("-> Cout : %llu\n", *cost);
 
     return cost;
 }
@@ -50,10 +50,10 @@ int main() {
 
     brute(N, 0, best_perm, &best_cost, assignment_cost);
 
-    printf("\n Meilleure affectation (personne → tâche) :\n");
+    printf("\n Meilleure affectation (personne -> tache) :\n");
     for (int i = 0; i < N; ++i)
-        printf("  Personne %d → Tâche %d\n", i, best_perm[i]);
-    printf("Coût total : %llu\n", best_cost);
+        printf("  Personne %d -> Tache %d\n", i, best_perm[i]);
+    printf("Cout total : %llu\n", best_cost);
 
     return 0;
 }
