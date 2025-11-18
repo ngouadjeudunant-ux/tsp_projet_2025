@@ -3,16 +3,26 @@
  * Met à jour la meilleure tournée trouvée ; doit respecter le handler Ctrl-C.
  * Entrée : Instance + dist_fct ; Sortie : meilleure Tour et sa longueur.
  */
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <signal.h>
 #include "algo_bf.h"
+
+// variable globale définie dans main.c
+extern volatile sig_atomic_t stop_requested;
 
 static void permute(int nb_nodes, int pos, int *perm, bool *used,
                     int *best_perm, unsigned long long *count_best,
                     void *(*cout)(void *, int *)) {
+
+    // Si Ctrl-C → on arrête immédiatement la récursion
+    if (stop_requested)
+        return;
+
     if (pos == nb_nodes) {
-        void *res = cout(NULL, perm); // data = NULL pour TSP
+        void *res = cout(NULL, perm);
         if (res != NULL) {
             unsigned long long cost = *(unsigned long long *)res;
             if (cost < *count_best) {
@@ -25,11 +35,19 @@ static void permute(int nb_nodes, int pos, int *perm, bool *used,
     }
 
     for (int i = 0; i < nb_nodes; ++i) {
+        if (stop_requested)
+            return;
+
         if (!used[i]) {
             perm[pos] = i;
             used[i] = true;
+
             permute(nb_nodes, pos + 1, perm, used, best_perm, count_best, cout);
+
             used[i] = false;
+
+            if (stop_requested)
+                return;
         }
     }
 }
@@ -39,6 +57,7 @@ double brute(int nb_nodes,
              int *best_perm,
              unsigned long long *count_best,
              void *(*cout)(void *, int *)) {
+
     (void)nb_ressources;
 
     int *perm = malloc(nb_nodes * sizeof(int));
