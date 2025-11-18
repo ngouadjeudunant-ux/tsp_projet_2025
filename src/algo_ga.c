@@ -14,7 +14,7 @@
 /* Variable globale provenant de main.c */
 extern volatile sig_atomic_t stop_requested;
 
-/* ---------- Type interne pour un individu ---------- */
+/*Type interne pour un individu  */
 
 typedef struct {
     int    n;      /* nombre de villes */
@@ -22,13 +22,13 @@ typedef struct {
     double fitness;/* longueur de la tournée */
 } GA_Individual;
 
-/* ---------- Outils aléatoires ---------- */
+/* Outils aléatoires */
 
 static int rand_int(int a, int b) {
     return a + rand() % (b - a + 1);
 }
 
-/* ---------- Longueur d'une permutation (tour TSP) ---------- */
+/* Longueur d'une permutation (tour TSP) */
 
 static double ga_tour_length(const TSP_Instance *inst, const int *perm) {
     int n = inst->dimension;
@@ -45,7 +45,7 @@ static double ga_tour_length(const TSP_Instance *inst, const int *perm) {
     return total;
 }
 
-/* ---------- Génération permutation aléatoire ---------- */
+/* Génération permutation aléatoire */
 
 static void generate_random_perm(int *perm, int n) {
     for (int i = 0; i < n; ++i)
@@ -59,7 +59,7 @@ static void generate_random_perm(int *perm, int n) {
     }
 }
 
-/* ---------- Mutation swap ---------- */
+/* Mutation swap  */
 
 static void swap_mutation(int *perm, int n, double mutation_rate) {
     for (int i = 0; i < n; ++i) {
@@ -72,7 +72,7 @@ static void swap_mutation(int *perm, int n, double mutation_rate) {
     }
 }
 
-/* ---------- Ordered Crossover (OX) ---------- */
+/* Ordered Crossover (OX) */
 
 static void ordered_crossover(const int *p1, const int *p2, int *child, int n) {
 
@@ -105,7 +105,7 @@ static void ordered_crossover(const int *p1, const int *p2, int *child, int n) {
     }
 }
 
-/* ---------- Sélection par tournoi ---------- */
+/*Sélection par tournoi */
 
 static int tournament_select_index(GA_Individual *pop, int pop_size, int tsize) {
     int best = -1;
@@ -117,7 +117,7 @@ static int tournament_select_index(GA_Individual *pop, int pop_size, int tsize) 
     return best;
 }
 
-/* ---------- Copier un individu ---------- */
+/*Copier un individu */
 
 static void copy_individual(const GA_Individual *src, GA_Individual *dst) {
     dst->n       = src->n;
@@ -125,9 +125,9 @@ static void copy_individual(const GA_Individual *src, GA_Individual *dst) {
     memcpy(dst->perm, src->perm, src->n * sizeof(int));
 }
 
-/* ============================================================
- *                  ALGORTIHME GÉNÉTIQUE COMPLET
- * ============================================================ */
+/* 
+ * ALGORTIHME GÉNÉTIQUE COMPLET
+ */
 
 int* ga_tour(const TSP_Instance *inst, int pop_size, int generations, double mutation_rate)
 {
@@ -179,9 +179,9 @@ int* ga_tour(const TSP_Instance *inst, int pop_size, int generations, double mut
 
     copy_individual(&pop[best_idx], &best);
 
-    /* ---------------------------------------------------------
-     *                     BOUCLE DES GÉNÉRATIONS
-     * --------------------------------------------------------- */
+    /*
+     *BOUCLE DES GÉNÉRATIONS
+     */
     for (int gen = 0; gen < generations; ++gen) {
 
         if (stop_requested) break;
@@ -225,9 +225,9 @@ int* ga_tour(const TSP_Instance *inst, int pop_size, int generations, double mut
         childpop = tmp;
     }
 
-    /* ---------------------------------------------------------
-     *           Construire la tournée finale retournée
-     * --------------------------------------------------------- */
+    /* 
+     * Construire la tournée finale retournée
+     */
     int *tour = malloc((n + 1) * sizeof(int));
     for (int i = 0; i < n; ++i)
         tour[i] = best.perm[i];
