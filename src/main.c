@@ -8,6 +8,7 @@
 #include "tsp_parser.h"
 #include "algo_nn.h"
 #include "algo_bf.h"
+#include "algo_rw.h"
 #include "csv_export.h"
 
 // Variable globale utilisée dans tsp_cost
@@ -76,6 +77,10 @@ int main(int argc, char **argv) {
             brute(inst->dimension, 0, tour, &best_cost, tsp_cost);
             length = (double)best_cost;
         }
+    } else if (!strcmp(methode, "rw")){
+        tour = rw_tour(inst);
+        if (tour)
+            length = tour_length(inst, tour);
     } else {
         fprintf(stderr, "Méthode inconnue : %s\n", methode);
         usage(argv[0]);
