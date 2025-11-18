@@ -11,6 +11,7 @@
 #include "algo_rw.h"
 #include "csv_export.h"
 #include "algo_2opt.h"
+#include "algo_ga.h"
 
 
 // Variable globale utilisée dans tsp_cost
@@ -37,12 +38,22 @@ int main(int argc, char **argv) {
     const char *fichier = NULL;
     const char *methode = NULL;
     const char *csv_file = NULL;
+    //cas de génétique
+    int pop_size;
+    int generations;
+    double mut_rate;
 
     for (int i = 1; i < argc; ++i) {
         if (!strcmp(argv[i], "-f") && i + 1 < argc)
             fichier = argv[++i];
-        else if (!strcmp(argv[i], "-m") && i + 1 < argc)
+        else if (!strcmp(argv[i], "-m") && i + 1 < argc){
             methode = argv[++i];
+            if (!strcmp(methode, "ga")){
+                pop_size = atoi(argv[++i]);
+                generations = atoi(argv[++i]);
+                mut_rate = atof(argv[++i]);
+            }
+        }
         else if (!strcmp(argv[i], "-o") && i + 1 < argc)
             csv_file = argv[++i];
         else if (!strcmp(argv[i], "-h")) {
@@ -81,6 +92,10 @@ int main(int argc, char **argv) {
         }
     } else if (!strcmp(methode, "rw")){
         tour = rw_tour(inst);
+        if (tour)
+            length = tour_length(inst, tour);
+    } else if (!strcmp(methode, "ga")){
+        tour = ga_tour(inst, pop_size, generations, mut_rate);
         if (tour)
             length = tour_length(inst, tour);
     } else if (!strcmp(methode, "nn2opt")) {
