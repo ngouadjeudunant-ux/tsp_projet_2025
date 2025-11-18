@@ -103,7 +103,7 @@ void test_distance_calculation() {
 
 int main(int argc, char **argv) {
 
-    test_distance_calculation(); 
+    //test_distance_calculation(); 
 
     const char *fichier = NULL;
     const char *methode = NULL;
