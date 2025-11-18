@@ -6,6 +6,8 @@
 #include <time.h>
 #include <signal.h>
 
+#include "tsp_types.h" 
+#include "distance.h"
 #include "tsp_parser.h"
 #include "algo_nn.h"
 #include "algo_bf.h"
@@ -46,7 +48,62 @@ void usage(const char *prog) {
            "[ga: pop gen mut] [-o <export.csv>]\n", prog);
 }
 
+// Fonction de test des distances. 
+void test_distance_calculation() {
+    printf("\n=== TEST DE CALCUL DES DISTANCES TSPLIB ===\n");
+    
+    // 1. Définition de l'Instance de Test (V1: 10, 20 ; V2: 14, 23)
+    TSP_Instance test_instance;
+    test_instance.dimension = 2;
+    test_instance.x = malloc(2 * sizeof(double));
+    test_instance.y = malloc(2 * sizeof(double));
+    test_instance.dist = NULL; 
+
+    test_instance.x[0] = 10.0;
+    test_instance.y[0] = 20.0;
+    test_instance.x[1] = 14.0;
+    test_instance.y[1] = 23.0;
+
+    // --- TEST EUC_2D ---
+    test_instance.dist_type = DIST_EUC_2D;
+    build_distance_matrix(&test_instance);
+    double dist_euc = test_instance.dist[0 * 2 + 1];
+    printf("EUC_2D (V1:10,20; V2:14,23) : %.0f\n", dist_euc);
+    if (test_instance.dist) free(test_instance.dist); 
+    test_instance.dist = NULL;
+
+    // --- TEST ATT ---
+    test_instance.dist_type = DIST_ATT;
+    build_distance_matrix(&test_instance);
+    double dist_att = test_instance.dist[0 * 2 + 1];
+    printf("ATT    (V1:10,20; V2:14,23) : %.0f\n", dist_att);
+    if (test_instance.dist) free(test_instance.dist);
+    test_instance.dist = NULL;
+
+    // --- TEST GEO ---
+    // Utilisation de coordonnées simplifiées pour un test fonctionnel
+    test_instance.x[0] = 40.0; 
+    test_instance.y[0] = 5.0;  
+    test_instance.x[1] = 40.0; 
+    test_instance.y[1] = 5.01; 
+
+    test_instance.dist_type = DIST_GEO;
+    build_distance_matrix(&test_instance);
+    double dist_geo = test_instance.dist[0 * 2 + 1];
+    printf("GEO    (V1:40.0, 5.0; V2:40.0, 5.01) : %.0f\n", dist_geo);
+    if (test_instance.dist) free(test_instance.dist);
+    test_instance.dist = NULL;
+    
+    // Libération des coordonnées
+    free(test_instance.x);
+    free(test_instance.y);
+
+    printf("=======================================\n");
+}
+
 int main(int argc, char **argv) {
+
+    test_distance_calculation(); 
 
     const char *fichier = NULL;
     const char *methode = NULL;
