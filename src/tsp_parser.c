@@ -12,7 +12,7 @@
 #define MAX_VALUE_LENGTH 256
 
 // ---------------------------------------------------------------------
-//  🔹  Fonctions utilitaires
+//  Fonctions utilitaires
 // ---------------------------------------------------------------------
 
 /**
@@ -88,7 +88,7 @@ static int line_starts_with(const char *line, const char *prefix) {
 }
 
 // ---------------------------------------------------------------------
-//  🔹  Parsing principal
+//   Parsing principal
 // ---------------------------------------------------------------------
 
 TSP_Instance *tsp_read_file(const char *filename) {
@@ -197,7 +197,7 @@ TSP_Instance *tsp_read_file(const char *filename) {
 }
 
 // ---------------------------------------------------------------------
-//  🔹  Gestion mémoire & affichage
+//  Gestion mémoire & affichage
 // ---------------------------------------------------------------------
 
 void tsp_free_instance(TSP_Instance *inst) {

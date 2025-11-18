@@ -10,6 +10,8 @@
 #include "algo_bf.h"
 #include "algo_rw.h"
 #include "csv_export.h"
+#include "algo_2opt.h"
+
 
 // Variable globale utilisée dans tsp_cost
 TSP_Instance *global_inst = NULL;
@@ -81,7 +83,19 @@ int main(int argc, char **argv) {
         tour = rw_tour(inst);
         if (tour)
             length = tour_length(inst, tour);
-    } else {
+    } else if (!strcmp(methode, "nn2opt")) {
+    tour = nn_tour(inst);
+    if (tour) {
+        improve_2opt(inst, tour);
+        length = tour_length(inst, tour);
+    }
+    } else if (!strcmp(methode, "rw2opt")) {
+    tour = rw_tour(inst);
+    if (tour) {
+        improve_2opt(inst, tour);
+        length = tour_length(inst, tour);
+    }
+    }else{
         fprintf(stderr, "Méthode inconnue : %s\n", methode);
         usage(argv[0]);
         tsp_free_instance(inst);
