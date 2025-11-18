@@ -12,8 +12,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "algo_bf.h"  //  le bon header pour la fonction générique
+#include <signal.h>
 
 #define N 3
+ 
+volatile sig_atomic_t stop_requested = 0;
 
 // Définition de la matrice des coûts [personne][tâche]
 int cost_matrix[N][N] = {
