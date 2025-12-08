@@ -1,11 +1,6 @@
 CC=gcc
-CFLAGS=-Iinclude -lm -std=c99 -Wextra -Wall -Werror -pedantic
+CFLAGS=-Iinclude -lm
 LDFLAGS=-lm
-
-ECHO = @
-ifeq ($(VERBOSE),yes)
-	ECHO=
-endif
 
 ifeq ($(DEBUG),no)
 	CFLAGS += -O3 -DNDEBUG
@@ -31,4 +26,4 @@ $(EXEC): $(OBJ)
 	$(ECHO)$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
-	$(ECHO)$(CC) -o $@ -c $< $(CFLAGS)
+	$(CC) -o $@ -c $< $(CFLAGS)
