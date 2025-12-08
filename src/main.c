@@ -44,8 +44,8 @@ void *tsp_cost(void *unused, int *perm) {
 }
 
 void usage(const char *prog) {
-    printf("Usage : %s -f <fichier.tsp> -m <nn|bf|rw|nn2opt|rw2opt|ga|gadpx> "
-           "[ga|gadpx: pop gen mut] [-o <export.csv>]\n", prog);
+    printf("Usage : %s -f <fichier.tsp> -m <all|nn|bf|rw|nn2opt|rw2opt|ga|gadpx> "
+           "[ga|gadpx|all: pop gen mut] [-o <export.csv>]\n", prog);
 }
 
 // Fonction de test des distances. 
@@ -110,9 +110,15 @@ int main(int argc, char **argv) {
     const char *csv_file = NULL;
 
     // paramètres GA
-    int pop_size = 50;
-    int generations = 200;
-    double mut_rate = 0.05;
+    int pop_size;
+    int generations;
+    double mut_rate;
+
+    // is all ?
+    int all = 0;
+    int ** tours;
+    double * elapses;
+    double * lengths;
 
     // Lecture arguments
     for (int i = 1; i < argc; ++i) {
@@ -121,7 +127,7 @@ int main(int argc, char **argv) {
 
         else if (!strcmp(argv[i], "-m") && i + 1 < argc) {
             methode = argv[++i];
-            if (!strcmp(methode, "ga") || !strcmp(methode, "gadpx")) {
+            if (!strcmp(methode, "ga") || !strcmp(methode, "gadpx") || !strcmp(methode, "all")) {
                 if (argc < i + 4) {
                     printf("Usage GA : -m %s <pop> <gen> <mut>\n", methode);
                     return 1;
@@ -200,6 +206,39 @@ int main(int argc, char **argv) {
     } else if (!strcmp(methode, "gadpx")) {
         tour = ga_tour(inst, pop_size, generations, mut_rate, 1);
         if (tour) length = tour_length(inst, tour);
+    } else if (!strcmp(methode, "all")){
+        all = 1;
+        tours = malloc(sizeof(int*)*6);
+        elapses = malloc(sizeof(double)*6);
+        lengths = malloc(sizeof(double)*6);
+
+        tours[0] = nn_tour(inst); //nn
+        elapses[0] = (double)(clock()-start) / CLOCKS_PER_SEC;
+
+        start = clock();
+        tours[1] = rw_tour(inst); //rw
+        elapses[1] = (double)(clock()-start) / CLOCKS_PER_SEC;
+
+        start = clock();
+        tours[2] = nn_tour(inst); //nn2opt
+        improve_2opt(inst, tours[2]); //2opt
+        elapses[2] = (double)(clock()-start) / CLOCKS_PER_SEC;
+
+        start = clock();
+        tours[3] = rw_tour(inst); //rw2opt
+        improve_2opt(inst, tours[3]); //2opt
+        elapses[3] = (double)(clock()-start) / CLOCKS_PER_SEC;
+
+        start = clock();
+        tours[4] = ga_tour(inst, pop_size, generations, mut_rate, 0); //ga
+        elapses[4] = (double)(clock()-start) / CLOCKS_PER_SEC;
+
+        start = clock();
+        tours[5] = ga_tour(inst, pop_size, generations, mut_rate, 1); //gadpx
+        elapses[5] = (double)(clock()-start) / CLOCKS_PER_SEC;
+
+        for (int i = 0; i < 6; i++)
+            if (tours[i]) lengths[i] = tour_length(inst, tours[i]);
     } else {
         printf("Méthode inconnue.\n");
         return 3;
@@ -211,7 +250,7 @@ int main(int argc, char **argv) {
     if (stop_requested)
         printf("\n[!] Interruption utilisateur (Ctrl-C)\n");
 
-    if (tour) {
+    if (!all && tour) {
         printf("[!] Meilleure solution trouvée :\n");
         printf("Méthode : %s\n", methode);
 
@@ -227,6 +266,25 @@ int main(int argc, char **argv) {
             export_summary_csv(csv_file, inst->name, methode, elapsed, length, tour, inst->dimension);
 
         free(tour);
+    } else if (all){
+        printf("[!] Execution de toutes les méthodes :\n");
+        char* methodes[] = {"nn", "rw", "nn2opt", "rw2opt", "ga", "gadpx"};
+        for (int i = 0; i < 6; i++){
+            printf("Méthode : %s\n", methodes[i]);
+    
+            printf("Tournée : ");
+            for (int j = 0; j < inst->dimension; ++j)
+                printf("%d ", tours[i][j] + 1);
+            printf("%d\n", tours[i][0] + 1);
+    
+            printf("Longueur : %.0f\n", lengths[i]);
+            printf("Durée    : %.3fs\n\n", elapses[i]);
+    
+            if (csv_file)
+                export_summary_csv(csv_file, inst->name, methodes[i], elapsed, length, tours[i], inst->dimension);
+    
+            free(tours[i]);
+        }
     }
 
     tsp_free_instance(inst);
