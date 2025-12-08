@@ -72,6 +72,65 @@ static void swap_mutation(int *perm, int n, double mutation_rate) {
     }
 }
 
+/* DPX Util: next_of */
+static int next_of(const int *tour, const int v, int n){
+    for (int i = 0; i < n-1; ++i){
+        if (tour[i] == v) return tour[i+1];
+    }
+    return -1;
+}
+
+/* DPX Util: Separates the edges */
+static void seperate_edges(const int *p1, const int *p2, int ** arretes, int n){
+    for (int i = 0; i < n; ++i){
+        arretes[i] = malloc(sizeof(int)*(n+1));
+        for (int j = 0; j < n+1; j++){
+            arretes[i][j] = -1;
+        }
+    }
+
+    arretes[0][0] = p1[0];
+    int j = 0;
+    int k = 1;
+    for (int i = 0; i < n-1; ++i){
+        if (next_of(p2, p1[i], n) == p1[i+1]){
+            arretes[j][k] = p1[i+1];
+            k++;
+        } else {
+            arretes[j][n] = k;
+            j++;
+            arretes[j][0] = p1[i+1];
+            k = 1;
+        }
+    }
+    arretes[j][n] = k;
+}
+
+/* DPX Util: Nearest Neighbor*/
+
+static int nearest_neighbor(){
+
+}
+
+/* Distance preserving crossover (DPX)*/
+
+static void dpx(const int *p1, const int *p2, int *child, int n){
+    for (int i = 0; i < n; ++i)
+        child[i] = p1[i];
+
+    int ** arretes = malloc(sizeof(int*)*n);
+    seperate_edges(p1, p2, arretes, n);
+    int * first_edges = malloc(sizeof(int)*n);
+    int * end_edges = malloc(sizeof(int)*n);
+    for (int i = 0; i < n; i++){
+        first_edges[i] = arretes[i][0];
+        end_edges[i] = arretes[i][n] > 0 ? arretes[i][arretes[i][n]-1] : -1;
+    }
+    
+
+    
+}
+
 /* Ordered Crossover (OX) */
 
 static void ordered_crossover(const int *p1, const int *p2, int *child, int n) {
@@ -133,7 +192,7 @@ int* ga_tour(const TSP_Instance *inst, int pop_size, int generations, double mut
 {
     if (!inst || inst->dimension <= 0 || !inst->dist)
         return NULL;
-
+    
     int n = inst->dimension;
 
     if (pop_size < 2) pop_size = 2;
@@ -194,7 +253,7 @@ int* ga_tour(const TSP_Instance *inst, int pop_size, int generations, double mut
             int p1 = tournament_select_index(pop, pop_size, tsize);
             int p2 = tournament_select_index(pop, pop_size, tsize);
 
-            ordered_crossover(pop[p1].perm, pop[p2].perm, childpop[i].perm, n);
+            dpx(pop[p1].perm, pop[p2].perm, childpop[i].perm, n);
             swap_mutation(childpop[i].perm, n, mutation_rate);
             childpop[i].fitness = ga_tour_length(inst, childpop[i].perm);
         }
