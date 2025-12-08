@@ -9,6 +9,7 @@
 #include <signal.h>
 
 #include "algo_ga.h"
+#include "algo_2opt.h"
 #include "tsp_parser.h"
 
 /* Variable globale provenant de main.c */
@@ -72,63 +73,135 @@ static void swap_mutation(int *perm, int n, double mutation_rate) {
     }
 }
 
-/* DPX Util: next_of */
-static int next_of(const int *tour, const int v, int n){
-    for (int i = 0; i < n-1; ++i){
-        if (tour[i] == v) return tour[i+1];
-    }
-    return -1;
-}
+/* DPX Util: Nearest Segment*/
 
-/* DPX Util: Separates the edges */
-static void seperate_edges(const int *p1, const int *p2, int ** arretes, int n){
-    for (int i = 0; i < n; ++i){
-        arretes[i] = malloc(sizeof(int)*(n+1));
-        for (int j = 0; j < n+1; j++){
-            arretes[i][j] = -1;
+static int nearest_segment(
+        const TSP_Instance *inst,
+        int current_node,
+        int *seg_start,
+        int *seg_end,
+        int *used,
+        int seg_count,
+        int *reverse_out)
+{
+    double best = 1e18;
+    int best_seg = -1;
+    int rev = 0;
+
+    for (int s = 0; s < seg_count; s++) {
+        if (used[s]) continue;
+
+        int a = seg_start[s];
+        int b = seg_end[s];
+
+        double d1 = inst->dist[current_node * inst->dimension + a];
+        if (d1 < best) {
+            best = d1;
+            best_seg = s;
+            rev = 0;   // append forward
+        }
+
+        double d2 = inst->dist[current_node * inst->dimension + b];
+        if (d2 < best) {
+            best = d2;
+            best_seg = s;
+            rev = 1;   // append reversed
         }
     }
 
-    arretes[0][0] = p1[0];
-    int j = 0;
-    int k = 1;
-    for (int i = 0; i < n-1; ++i){
-        if (next_of(p2, p1[i], n) == p1[i+1]){
-            arretes[j][k] = p1[i+1];
-            k++;
-        } else {
-            arretes[j][n] = k;
-            j++;
-            arretes[j][0] = p1[i+1];
-            k = 1;
-        }
-    }
-    arretes[j][n] = k;
-}
-
-/* DPX Util: Nearest Neighbor*/
-
-static int nearest_neighbor(){
-
+    *reverse_out = rev;
+    return best_seg;
 }
 
 /* Distance preserving crossover (DPX)*/
 
-static void dpx(const int *p1, const int *p2, int *child, int n){
-    for (int i = 0; i < n; ++i)
-        child[i] = p1[i];
+static void dpx(
+        const TSP_Instance *inst,
+        const int *p1,
+        const int *p2,
+        int *child,
+        int n)
+{
+    /* -------- STEP 1: Find identical edges => build segments ---------- */
 
-    int ** arretes = malloc(sizeof(int*)*n);
-    seperate_edges(p1, p2, arretes, n);
-    int * first_edges = malloc(sizeof(int)*n);
-    int * end_edges = malloc(sizeof(int)*n);
-    for (int i = 0; i < n; i++){
-        first_edges[i] = arretes[i][0];
-        end_edges[i] = arretes[i][n] > 0 ? arretes[i][arretes[i][n]-1] : -1;
+    int **segments = malloc(n * sizeof(int*));
+    int *seg_len = calloc(n, sizeof(int));
+    int seg_count = 0;
+
+    for (int i = 0; i < n; i++) {
+        segments[i] = malloc(n * sizeof(int));
+        for (int j = 0; j < n; j++) segments[i][j] = -1;
     }
-    
 
-    
+    segments[0][0] = p1[0];
+    seg_len[0] = 1;
+
+    for (int i = 0; i < n-1; i++) {
+        int a = p1[i];
+        int b = p1[i+1];
+
+        int found = 0;
+        for (int j = 0; j < n-1; j++)
+            if (p2[j] == a && p2[j+1] == b)
+                found = 1;
+
+        if (found) {
+            segments[seg_count][seg_len[seg_count]++] = b;
+        } else {
+            seg_count++;
+            segments[seg_count][0] = b;
+            seg_len[seg_count] = 1;
+        }
+    }
+    seg_count++;
+
+    /* -------- STEP 2: Create lists of segment starts and ends ---------- */
+
+    int *seg_start = malloc(seg_count * sizeof(int));
+    int *seg_end   = malloc(seg_count * sizeof(int));
+    int *used      = calloc(seg_count, sizeof(int));
+
+    for (int s = 0; s < seg_count; s++) {
+        seg_start[s] = segments[s][0];
+        seg_end[s]   = segments[s][seg_len[s] - 1];
+    }
+
+    /* -------- STEP 3: Build the child ---------- */
+
+    int pos = 0;
+
+    // Always start with segment 0
+    for (int j = 0; j < seg_len[0]; j++)
+        child[pos++] = segments[0][j];
+    used[0] = 1;
+
+    int current_node = seg_end[0];
+
+    // Connect all remaining segments
+    for (int step = 1; step < seg_count; step++) {
+        int rev;
+        int best = nearest_segment(inst, current_node, seg_start, seg_end, used, seg_count, &rev);
+
+        used[best] = 1;
+
+        if (!rev) {
+            for (int j = 0; j < seg_len[best]; j++)
+                child[pos++] = segments[best][j];
+            current_node = seg_end[best];
+        } else {
+            for (int j = seg_len[best]-1; j >= 0; j--)
+                child[pos++] = segments[best][j];
+            current_node = seg_start[best];
+        }
+    }
+
+    /* -------- FREE memory ---------- */
+    for (int s = 0; s < n; s++) free(segments[s]);
+    free(segments);
+    free(seg_len);
+    free(seg_start);
+    free(seg_end);
+    free(used);
 }
 
 /* Ordered Crossover (OX) */
@@ -188,7 +261,7 @@ static void copy_individual(const GA_Individual *src, GA_Individual *dst) {
  * ALGORTIHME GÉNÉTIQUE COMPLET
  */
 
-int* ga_tour(const TSP_Instance *inst, int pop_size, int generations, double mutation_rate)
+int* ga_tour(const TSP_Instance *inst, int pop_size, int generations, double mutation_rate, int use_dpx)
 {
     if (!inst || inst->dimension <= 0 || !inst->dist)
         return NULL;
@@ -252,8 +325,13 @@ int* ga_tour(const TSP_Instance *inst, int pop_size, int generations, double mut
 
             int p1 = tournament_select_index(pop, pop_size, tsize);
             int p2 = tournament_select_index(pop, pop_size, tsize);
-
-            dpx(pop[p1].perm, pop[p2].perm, childpop[i].perm, n);
+            if (use_dpx){
+                dpx(inst, pop[p1].perm, pop[p2].perm, childpop[i].perm, n);
+                improve_2opt(inst, childpop[i].perm);
+                
+            } else {
+                ordered_crossover(pop[p1].perm, pop[p2].perm, childpop[i].perm, n);
+            }
             swap_mutation(childpop[i].perm, n, mutation_rate);
             childpop[i].fitness = ga_tour_length(inst, childpop[i].perm);
         }

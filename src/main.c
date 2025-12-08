@@ -44,8 +44,8 @@ void *tsp_cost(void *unused, int *perm) {
 }
 
 void usage(const char *prog) {
-    printf("Usage : %s -f <fichier.tsp> -m <nn|bf|rw|nn2opt|rw2opt|ga> "
-           "[ga: pop gen mut] [-o <export.csv>]\n", prog);
+    printf("Usage : %s -f <fichier.tsp> -m <nn|bf|rw|nn2opt|rw2opt|ga|gadpx> "
+           "[ga|gadpx: pop gen mut] [-o <export.csv>]\n", prog);
 }
 
 // Fonction de test des distances. 
@@ -121,9 +121,9 @@ int main(int argc, char **argv) {
 
         else if (!strcmp(argv[i], "-m") && i + 1 < argc) {
             methode = argv[++i];
-            if (!strcmp(methode, "ga")) {
+            if (!strcmp(methode, "ga") || !strcmp(methode, "gadpx")) {
                 if (argc < i + 4) {
-                    printf("Usage GA : -m ga <pop> <gen> <mut>\n");
+                    printf("Usage GA : -m %s <pop> <gen> <mut>\n", methode);
                     return 1;
                 }
                 pop_size = atoi(argv[++i]);
@@ -194,9 +194,12 @@ int main(int argc, char **argv) {
         }
 
     } else if (!strcmp(methode, "ga")) {
-        tour = ga_tour(inst, pop_size, generations, mut_rate);
+        tour = ga_tour(inst, pop_size, generations, mut_rate, 0);
         if (tour) length = tour_length(inst, tour);
 
+    } else if (!strcmp(methode, "gadpx")) {
+        tour = ga_tour(inst, pop_size, generations, mut_rate, 1);
+        if (tour) length = tour_length(inst, tour);
     } else {
         printf("Méthode inconnue.\n");
         return 3;
