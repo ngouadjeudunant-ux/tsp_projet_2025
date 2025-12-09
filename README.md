@@ -15,3 +15,6 @@ make
 ## Sous Windows
 Compiler avec :
 gcc src/*.c -Iinclude -o bin/tsp.exe -lm
+
+L'exécutable sera généré dans:
+bin/tsp
