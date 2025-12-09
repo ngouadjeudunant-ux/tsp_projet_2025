@@ -1,4 +1,4 @@
-// Compilation : gcc src/*.c -Iinclude -o tsp.exe -lm
+// Compilation : gcc src/*.c -Iinclude -o bin/tsp.exe -lm
 // Execution exemple : ./tsp.exe -f tests/data/att15.tsp -m nn
 #include <stdio.h>
 #include <stdlib.h>
