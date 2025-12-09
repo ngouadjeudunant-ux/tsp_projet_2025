@@ -44,7 +44,7 @@ void *tsp_cost(void *unused, int *perm) {
 }
 
 void usage(const char *prog) {
-    printf("Usage : %s -f <fichier.tsp> -m <all|nn|bf|rw|nn2opt|rw2opt|ga|gadpx> "
+    fprintf(stderr, "Usage : %s -f <fichier.tsp> -m <all|nn|bf|rw|nn2opt|rw2opt|ga|gadpx> "
            "[ga|gadpx|all: pop gen mut] [-o <export.csv>]\n", prog);
 }
 
@@ -129,7 +129,8 @@ int main(int argc, char **argv) {
             methode = argv[++i];
             if (!strcmp(methode, "ga") || !strcmp(methode, "gadpx") || !strcmp(methode, "all")) {
                 if (argc < i + 4) {
-                    printf("Usage GA : -m %s <pop> <gen> <mut>\n", methode);
+                    if (!strcmp(methode, "all")) fprintf(stderr, "La méthode ALL demande les paramètres du GA.\n");
+                    fprintf(stderr, "Usage GA : -m %s <pop> <gen> <mut>\n", methode);
                     return 1;
                 }
                 pop_size = atoi(argv[++i]);
