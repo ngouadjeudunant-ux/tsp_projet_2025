@@ -1,18 +1,15 @@
 CC=gcc
-CFLAGS=-Iinclude -lm
-LDFLAGS=-lm
+FLAGS=-Iinclude -lm
 
 ifeq ($(DEBUG),no)
-	CFLAGS += -O3 -DNDEBUG
-	LDFLAGS +=
+	FLAGS += -O3 -DNDEBUG
 else
-	CFLAGS += -g 
-	LDFLAGS +=
+	FLAGS += -g 
 endif
 
 EXEC=tsp
 SRC= $(wildcard src/*.c)
-OBJ= $(SRC:.c=.o)
+OBJ = $(patsubst src/%.c, build/%.o, $(SRC))
 
 all:
 ifeq ($(DEBUG),yes)
@@ -20,10 +17,15 @@ ifeq ($(DEBUG),yes)
 else
 	@echo "Generating in release mode"
 endif
-	@$(MAKE) $(EXEC)
+	@$(MAKE) bin/$(EXEC)
 
-$(EXEC): $(OBJ)
-	$(ECHO)$(CC) -o $@ $^ $(LDFLAGS)
+bin/$(EXEC): $(OBJ)
+	mkdir -p bin
+	$(CC) -o $@ $^ $(FLAGS)
 
-%.o: %.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+build/%.o: src/%.c
+	mkdir -p build
+	$(CC) -o $@ -c $< $(FLAGS)
+
+clean:
+	rm -rf build/*.o

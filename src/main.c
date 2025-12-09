@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
 
         if (csv_file)
             export_summary_csv(csv_file, inst->name, methode, elapsed, length, tour, inst->dimension, 1);
-
+ 
         free(tour);
     } else if (all){
         printf("[!] Execution de toutes les méthodes :\n");
