@@ -1,20 +1,37 @@
-# tsp_projet_2025
-Projet avancé TSP en langage C - Automne 2025 
-Nous allons réaliser toutes nos taches ici
-# Membres de l'équipe
+# Projet TSP
+
+## Membres de l’équipe
+
 - GIHALU Russel  
 - TONFACK Dunant  
 - GAHA Wassim  
 
-# Compilation
-L'exécutable sera généré dans :
-bin/tsp
+## Comment compiler
 
-## Sous Linux
-Utiliser la commande suivante :
-make
+### Sous Linux
 
-## Sous Windows
-Compiler avec :
-gcc src/*.c -Iinclude -o bin/tsp.exe -lm
+Le projet inclut un `Makefile`. Pour compiler et générer l’exécutable :
 
+- Commande : `make`  
+- Binaire généré : `bin/tsp`  
+
+### Sous Windows
+
+Compilation manuelle avec GCC :
+
+- Commande : `gcc src/*.c -Iinclude -o bin/tsp.exe -lm`  
+
+## Usage
+
+Exécution générale :
+
+- Sous Linux : `./bin/tsp [options]`  
+- Sous Windows : `bin/tsp.exe [options]`  
+
+## Structure du projet
+
+- `src/` : fichiers source C (`main.c`, `algo_nn.c`, `algo_rw.c`, `algo_2opt.c`, `algo_ga.c`, etc.)  
+- `include/` : fichiers d’en-tête (`*.h`)  
+- `bin/` : répertoire de sortie pour l’exécutable (`tsp` ou `tsp.exe`)  
+- `Makefile` : règles de compilation sous Linux  
+- éventuellement `tests/data/` : fichiers TSPLIB à utiliser avec l’option `-f`.
