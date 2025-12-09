@@ -213,6 +213,7 @@ int main(int argc, char **argv) {
         elapses = malloc(sizeof(double)*6);
         lengths = malloc(sizeof(double)*6);
 
+        start = clock();
         tours[0] = nn_tour(inst); //nn
         elapses[0] = (double)(clock()-start) / CLOCKS_PER_SEC;
 
@@ -264,7 +265,7 @@ int main(int argc, char **argv) {
         printf("Durée    : %.3fs\n", elapsed);
 
         if (csv_file)
-            export_summary_csv(csv_file, inst->name, methode, elapsed, length, tour, inst->dimension);
+            export_summary_csv(csv_file, inst->name, methode, elapsed, length, tour, inst->dimension, 1);
 
         free(tour);
     } else if (all){
@@ -282,7 +283,7 @@ int main(int argc, char **argv) {
             printf("Durée    : %.3fs\n\n", elapses[i]);
     
             if (csv_file)
-                export_summary_csv(csv_file, inst->name, methodes[i], elapsed, length, tours[i], inst->dimension);
+                export_summary_csv(csv_file, inst->name, methodes[i], elapses[i], lengths[i], tours[i], inst->dimension, !i);
     
             free(tours[i]);
         }

@@ -8,7 +8,7 @@ extern "C" {
 int export_tour_csv(const char *filename, const int *tour, int n);
 
 int export_summary_csv(const char *filename, const char *instance_name, const char *method,
-                       double duration_sec, double cost, const int *tour, int n);
+                       double duration_sec, double cost, const int *tour, int n, int entete);
                        
 #ifdef __cplusplus
 }
