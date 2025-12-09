@@ -7,6 +7,8 @@ Nous allons réaliser toutes nos taches ici
 - GAHA Wassim  
 
 # Compilation
+L'exécutable sera généré dans :
+bin/tsp
 
 ## Sous Linux
 Utiliser la commande suivante :
@@ -16,5 +18,3 @@ make
 Compiler avec :
 gcc src/*.c -Iinclude -o bin/tsp.exe -lm
 
-L'exécutable sera généré dans:
-bin/tsp
